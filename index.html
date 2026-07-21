@@ -20,7 +20,7 @@
     --font-mono: 'JetBrains Mono', monospace;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+  html{scroll-behavior:smooth;font-size:18px;}
   body{
     background:var(--bg);
     color:var(--text);
@@ -69,8 +69,35 @@
   #hero-canvas{
     width:100%;height:100%;min-height:420px;
     position:relative;
+    cursor:grab;
   }
+  #hero-canvas.dragging{cursor:grabbing;}
   #hero-canvas canvas{display:block;}
+  .hero-tip{
+    position:absolute;
+    pointer-events:none;
+    background:rgba(10,13,18,.92);
+    border:1px solid var(--cyan);
+    color:var(--text);
+    font-family:var(--font-mono);
+    font-size:.74rem;
+    padding:7px 12px;
+    border-radius:2px;
+    transform:translate(-50%,-130%);
+    white-space:nowrap;
+    opacity:0;
+    transition:opacity .15s;
+    z-index:5;
+  }
+  .hero-tip.show{opacity:1;}
+  .hero-tip b{color:var(--cyan);}
+  .hero-hint{
+    position:absolute;bottom:8px;right:8px;
+    font-family:var(--font-mono);font-size:.66rem;color:var(--text-dim);
+    display:flex;align-items:center;gap:6px;
+    opacity:.75;pointer-events:none;
+  }
+  @media(max-width:900px){.hero-hint{display:none;}}
 
   .hero-text .eyebrow{
     font-family:var(--font-mono);
@@ -134,12 +161,16 @@
     aspect-ratio:3/4;border-radius:4px;overflow:hidden;border:1px solid var(--line);
     background:linear-gradient(160deg,var(--bg-panel),#0a0d12);
     display:flex;align-items:center;justify-content:center;
-    position:relative;
+    max-height:555px;
   }
-  .about-photo .frame-label{
-    position:absolute;top:16px;left:16px;font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);
+  .about-photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    display:flex;align-items:center;justify-content:center;
+    image-rendering:auto;
   }
-  .about-photo svg{width:52%;opacity:.9;}
   .about-copy p{color:var(--text-dim);line-height:1.85;font-size:1.02rem;margin-bottom:20px;}
   .about-copy strong{color:var(--text);font-weight:600;}
   .stat-row{display:flex;gap:40px;margin-top:36px;flex-wrap:wrap;}
@@ -150,7 +181,14 @@
 
   /* SKILLS */
   .skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);}
-  .skill-card{background:var(--bg);padding:32px 28px;}
+  .skill-card{background:var(--bg);padding:32px 28px;transition:box-shadow .3s, background .3s;}
+  .skill-card.flash{
+    animation:cardFlash 1.4s ease;
+  }
+  @keyframes cardFlash{
+    0%{box-shadow:inset 0 0 0 1px var(--cyan), 0 0 24px -4px var(--cyan); background:#0e1a1c;}
+    100%{box-shadow:inset 0 0 0 1px transparent, 0 0 0 0 transparent; background:var(--bg);}
+  }
   .skill-card .tag{font-family:var(--font-mono);font-size:.72rem;color:var(--amber);letter-spacing:.06em;margin-bottom:14px;}
   .skill-card h3{font-size:1.2rem;margin-bottom:16px;font-weight:600;}
   .skill-list{list-style:none;display:flex;flex-direction:column;gap:10px;}
@@ -177,11 +215,20 @@
   .tl-body ul{color:var(--text-dim);line-height:1.8;padding-left:18px;font-size:.94rem;}
 
   /* PROJECTS */
-  .projects-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;}
+  .projects-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:24px;
+    align-items:stretch;
+  }
+  @media(max-width:980px){ .projects-grid{grid-template-columns:repeat(2, 1fr);} }
+  @media(max-width:640px){ .projects-grid{grid-template-columns:1fr;} }
   .project-card{
     border:1px solid var(--line);padding:28px;position:relative;background:var(--bg-panel);
     transition:border-color .25s, transform .25s;
+    display:flex;flex-direction:column;
   }
+  .project-card p{flex:1;}
   .project-card:hover{border-color:var(--cyan);transform:translateY(-4px);}
   .project-card .pnum{font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);}
   .project-card h3{font-size:1.25rem;margin:10px 0 6px;font-weight:600;}
@@ -241,7 +288,10 @@
       <a href="#contact" class="btn ghost">Liên hệ</a>
     </div>
   </div>
-  <div id="hero-canvas"></div>
+  <div id="hero-canvas">
+    <div class="hero-tip" id="hero-tip"></div>
+    <div class="hero-hint">⟲ kéo để xoay · nhấn vào từng lớp để xem kỹ năng</div>
+  </div>
   <div class="scroll-hint"><div class="line"></div>scroll</div>
 </section>
 
@@ -252,8 +302,7 @@
   </div>
   <div class="about-grid">
     <div class="about-photo reveal">
-      <span class="frame-label"></span>
-      <img src="https://avatars.githubusercontent.com/thongst07vn" alt="Ngô Hoàng Thông" style="width: 100%; height: 100%; object-fit:cover;">
+      <img src="anh-CV.jpg" alt="Ngô Hoàng Thông" loading="lazy">
     </div>
     <div class="about-copy">
       <p>Tôi tốt nghiệp ngành <strong>Software Engineer</strong> tại Aptech Computer Education (9/2022 – 7/2025, GPA 82/100), với kinh nghiệm thực chiến qua nhiều dự án full-stack và tại <strong>C3Tek</strong> và <strong>Toyar Inc</strong>.</p>
@@ -261,7 +310,6 @@
       <p>Ngoài web, tôi từng phát triển ứng dụng di động với <strong>Flutter</strong> (đã publish trên Google Play) và game với <strong>Unity/C#</strong> — nên khá quen với việc chuyển đổi giữa nhiều stack công nghệ khác nhau.</p>
       <div class="stat-row">
         <div class="stat"><b>5+</b><span>dự án full-stack</span></div>
-        <div class="stat"><b>2</b><span>kỳ thực tập</span></div>
         <div class="stat"><b>82/100</b><span>GPA Aptech</span></div>
       </div>
       <div class="contact-strip">
@@ -280,7 +328,7 @@
     <h2>Stack công nghệ đang dùng</h2>
   </div>
   <div class="skills-grid reveal">
-    <div class="skill-card">
+    <div class="skill-card" id="skill-backend">
       <div class="tag">SERVER</div>
       <h3>Back-End</h3>
       <ul class="skill-list">
@@ -290,7 +338,7 @@
         <li>C# / ASP.NET <span class="lvl familiar">familiar</span></li>
       </ul>
     </div>
-    <div class="skill-card">
+    <div class="skill-card" id="skill-frontend">
       <div class="tag">CLIENT</div>
       <h3>Front-End</h3>
       <ul class="skill-list">
@@ -300,7 +348,7 @@
         <li>Angular <span class="lvl familiar">familiar</span></li>
       </ul>
     </div>
-    <div class="skill-card">
+    <div class="skill-card" id="skill-database">
       <div class="tag">STORAGE</div>
       <h3>Database</h3>
       <ul class="skill-list">
@@ -308,7 +356,7 @@
         <li>SQL Server <span class="lvl strong">strong</span></li>
       </ul>
     </div>
-    <div class="skill-card">
+    <div class="skill-card" id="skill-other">
       <div class="tag">TOOLING</div>
       <h3>Khác</h3>
       <ul class="skill-list">
@@ -487,11 +535,62 @@
     rim.position.set(-4, -2, -3);
     scene.add(rim);
 
+    // ---- Starfield background for depth ----
+    const starCount = 900;
+    const starGeo = new THREE.BufferGeometry();
+    const starPos = new Float32Array(starCount * 3);
+    const starCol = new Float32Array(starCount * 3);
+    const starPalette = [[0.37,0.92,0.83],[0.65,0.55,0.98],[0.96,0.70,0.31]];
+    for(let i=0;i<starCount;i++){
+      const r = 6 + Math.random()*22;
+      const theta = Math.random()*Math.PI*2;
+      const phi = Math.acos((Math.random()*2)-1);
+      starPos[i*3]   = r*Math.sin(phi)*Math.cos(theta);
+      starPos[i*3+1] = r*Math.cos(phi)*0.6;
+      starPos[i*3+2] = r*Math.sin(phi)*Math.sin(theta) - 4;
+      const c = starPalette[i % starPalette.length];
+      starCol[i*3]=c[0]; starCol[i*3+1]=c[1]; starCol[i*3+2]=c[2];
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    starGeo.setAttribute('color', new THREE.BufferAttribute(starCol, 3));
+    const starMat = new THREE.PointsMaterial({
+      size:0.045, vertexColors:true, transparent:true, opacity:0.55,
+      blending:THREE.AdditiveBlending, depthWrite:false, sizeAttenuation:true
+    });
+    const starField = new THREE.Points(starGeo, starMat);
+    scene.add(starField);
+
+    // ---- Soft glow sprite at the core of the stack ----
+    function makeGlowTexture(){
+      const c = document.createElement('canvas');
+      c.width = c.height = 128;
+      const ctx = c.getContext('2d');
+      const g = ctx.createRadialGradient(64,64,0,64,64,64);
+      g.addColorStop(0,'rgba(255,255,255,1)');
+      g.addColorStop(0.35,'rgba(94,234,212,0.55)');
+      g.addColorStop(1,'rgba(94,234,212,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0,0,128,128);
+      return new THREE.CanvasTexture(c);
+    }
+    const glowSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: makeGlowTexture(), blending:THREE.AdditiveBlending, transparent:true, depthWrite:false, opacity:0.8
+    }));
+    glowSprite.scale.set(3.2,3.2,1);
+    glowSprite.position.set(0,-0.1,0);
+    scene.add(glowSprite);
+
     // Group representing the "tech stack": layered translucent panels + wireframe core
     const group = new THREE.Group();
     scene.add(group);
 
     const layerColors = [0x5eead4, 0xa78bfa, 0xf5b350, 0x5eead4];
+    const layerLabels = [
+      'Database — MySQL, SQL Server',
+      'Back-End — Spring Boot, Laravel',
+      'Front-End — Vue.js, Angular, JS',
+      'Tích hợp — SignalR, PayPal, GCP'
+    ];
     const layers = [];
     const layerCount = 4;
     for(let i=0;i<layerCount;i++){
@@ -507,6 +606,7 @@
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.y = i * 0.55 - 0.8;
+      mesh.userData = {label: layerLabels[i], baseOpacity: 0.22, baseY: mesh.position.y};
       group.add(mesh);
 
       const edges = new THREE.EdgesGeometry(geo);
@@ -518,6 +618,7 @@
 
     // orbiting nodes (representing connected services)
     const nodeGeo = new THREE.SphereGeometry(0.055, 16, 16);
+    const nodeLabels = ['Git','Google Cloud','SignalR','Flutter','Unity','REST API','PayPal','MySQL','Auth','WebSocket'];
     const nodes = [];
     const nodeCount = 10;
     for(let i=0;i<nodeCount;i++){
@@ -526,7 +627,7 @@
       const radius = 2.1 + Math.random()*0.6;
       const angle = (i/nodeCount) * Math.PI * 2;
       const height = (Math.random()-0.5)*2.2;
-      node.userData = {radius, angle, height, speed: 0.15 + Math.random()*0.15};
+      node.userData = {radius, angle, height, speed: 0.15 + Math.random()*0.15, label: nodeLabels[i % nodeLabels.length], baseScale:1};
       group.add(node);
       nodes.push(node);
     }
@@ -540,26 +641,188 @@
       return l;
     });
 
+    // ---- Traveling "data pulse" points along each connection line ----
+    const pulseGeo = new THREE.SphereGeometry(0.035, 8, 8);
+    const pulses = nodes.map((n, i)=>{
+      const mat = new THREE.MeshBasicMaterial({
+        color: i % 2 === 0 ? 0x5eead4 : 0xf5b350,
+        transparent:true, opacity:0
+      });
+      const m = new THREE.Mesh(pulseGeo, mat);
+      m.userData = {phase: Math.random(), speed: 0.35 + Math.random()*0.25};
+      group.add(m);
+      return m;
+    });
+
     group.rotation.x = 0.2;
     group.rotation.y = 0.6;
 
-    // mouse parallax
-    let mouseX = 0, mouseY = 0;
-    window.addEventListener('mousemove', (e)=>{
-      mouseX = (e.clientX / window.innerWidth - 0.5);
-      mouseY = (e.clientY / window.innerHeight - 0.5);
-    });
+    // ---- Interaction: drag to rotate + click to inspect ----
+    const tip = document.getElementById('hero-tip');
+    const raycaster = new THREE.Raycaster();
+    const pointerNDC = new THREE.Vector2();
+    let isPointerDown = false;
+    let isDragging = false;
+    let startX = 0, startY = 0, prevX = 0, prevY = 0;
+    let velX = 0, velY = 0;
+    let userRotY = 0.6, userRotX = 0.2;
+    let idleTimer = 0;
+    let hovered = null;
+    const DRAG_THRESHOLD = 6;
+
+    // map each 3D layer to its matching skill card in the Skills section
+    const layerCardIds = ['skill-database','skill-backend','skill-frontend','skill-other'];
+    layers.forEach((l, i)=>{ l.userData.targetId = layerCardIds[i]; });
+
+    function setPointerFromEvent(e){
+      const rect = renderer.domElement.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      pointerNDC.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      pointerNDC.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      return {clientX, clientY, rect};
+    }
+
+    function raycastHover(p){
+      raycaster.setFromCamera(pointerNDC, camera);
+      const hits = raycaster.intersectObjects([...layers, ...nodes]);
+      if(hits.length){
+        const obj = hits[0].object;
+        hovered = obj;
+        tip.innerHTML = '<b>›</b> ' + (obj.userData.label || '') + (obj.userData.targetId ? ' <span style="color:var(--text-dim)">· nhấn để xem</span>' : '');
+        tip.style.left = (p.clientX - p.rect.left) + 'px';
+        tip.style.top = (p.clientY - p.rect.top) + 'px';
+        tip.classList.add('show');
+        container.style.cursor = 'pointer';
+      } else {
+        hovered = null;
+        tip.classList.remove('show');
+        container.style.cursor = isPointerDown ? 'grabbing' : 'grab';
+      }
+    }
+
+    function pointerDown(e){
+      isPointerDown = true;
+      isDragging = false;
+      idleTimer = 0;
+      const p = setPointerFromEvent(e);
+      startX = prevX = p.clientX;
+      startY = prevY = p.clientY;
+      velX = 0; velY = 0;
+    }
+    function pointerMove(e){
+      const p = setPointerFromEvent(e);
+      if(isPointerDown){
+        const totalDx = p.clientX - startX;
+        const totalDy = p.clientY - startY;
+        if(!isDragging && Math.hypot(totalDx, totalDy) > DRAG_THRESHOLD){
+          isDragging = true;
+          container.classList.add('dragging');
+          tip.classList.remove('show');
+        }
+        if(isDragging){
+          const dx = p.clientX - prevX;
+          const dy = p.clientY - prevY;
+          velX = dx * 0.005;
+          velY = dy * 0.005;
+          userRotY += velX;
+          userRotX = Math.max(-0.8, Math.min(0.8, userRotX + velY));
+        }
+        prevX = p.clientX; prevY = p.clientY;
+      } else {
+        raycastHover(p);
+      }
+    }
+    function pointerUp(e){
+      if(isPointerDown && !isDragging){
+        // treat as a real click/tap
+        const p = setPointerFromEvent(e.changedTouches ? {touches:e.changedTouches} : e);
+        raycastHover(p);
+        handleActivate();
+      }
+      isPointerDown = false;
+      isDragging = false;
+      container.classList.remove('dragging');
+      container.style.cursor = 'grab';
+    }
+
+    function flashCard(id){
+      const card = document.getElementById(id);
+      if(!card) return;
+      card.classList.remove('flash');
+      void card.offsetWidth; // restart animation
+      card.classList.add('flash');
+      card.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+
+    function handleActivate(){
+      if(!hovered) return;
+      const target = hovered;
+      // visible pulse feedback
+      const start = performance.now();
+      const orig = target.userData.baseScale || 1;
+      const pulse = ()=>{
+        const el = (performance.now()-start)/300;
+        if(el < 1){
+          const s = orig + Math.sin(el*Math.PI)*0.35;
+          target.scale.setScalar(s);
+          requestAnimationFrame(pulse);
+        } else {
+          target.scale.setScalar(orig);
+        }
+      };
+      pulse();
+
+      if(target.userData.targetId){
+        tip.innerHTML = '<b>✓</b> Đang mở ' + target.userData.label;
+        setTimeout(()=> flashCard(target.userData.targetId), 250);
+      }
+    }
+
+    const dom = renderer.domElement;
+    dom.addEventListener('mousedown', pointerDown);
+    dom.addEventListener('mousemove', pointerMove);
+    window.addEventListener('mouseup', pointerUp);
+    dom.addEventListener('touchstart', (e)=>{ pointerDown(e); }, {passive:true});
+    dom.addEventListener('touchmove', (e)=>{ pointerMove(e); }, {passive:true});
+    window.addEventListener('touchend', pointerUp);
 
     let t = 0;
     function animate(){
       requestAnimationFrame(animate);
-      t += reduceMotion ? 0.0025 : 0.01;
+      t += reduceMotion ? 0.0025 : 0.006;
 
-      group.rotation.y = 0.6 + t * 0.35 + mouseX * 0.4;
-      group.rotation.x = 0.2 + mouseY * 0.2;
+      if(!isDragging){
+        // momentum decay
+        userRotY += velX;
+        userRotX = Math.max(-0.8, Math.min(0.8, userRotX + velY));
+        velX *= 0.94;
+        velY *= 0.94;
+        idleTimer += 1;
+        // resume gentle auto-rotate once idle and momentum settled
+        if(idleTimer > 90 && Math.abs(velX) < 0.0005){
+          userRotY += reduceMotion ? 0.0008 : 0.0022;
+        }
+      }
+
+      group.rotation.y = userRotY;
+      group.rotation.x = userRotX;
+
+      // starfield slow drift
+      starField.rotation.y = t * 0.03;
+      starField.rotation.x = Math.sin(t*0.1) * 0.02;
+
+      // pulsing core glow
+      const pulseScale = 3.2 + Math.sin(t*1.6) * 0.35;
+      glowSprite.scale.set(pulseScale, pulseScale, 1);
+      glowSprite.material.opacity = 0.65 + Math.sin(t*1.6) * 0.15;
+
+      // cinematic light color breathing
+      const hue = (t*6) % 360;
+      rim.color.setHSL(((280 + hue) % 360)/360, 0.75, 0.62);
 
       layers.forEach((l, i)=>{
-        l.position.y = (i * 0.55 - 0.8) + Math.sin(t*1.4 + i) * 0.04;
+        l.position.y = l.userData.baseY + Math.sin(t*1.4 + i) * 0.04;
       });
 
       nodes.forEach((n, i)=>{
@@ -569,6 +832,12 @@
         const pos = connLines[i].geometry.attributes.position;
         pos.setXYZ(1, n.position.x, n.position.y, n.position.z);
         pos.needsUpdate = true;
+
+        // travel a glowing pulse from core to node and back, staggered per node
+        const pu = pulses[i];
+        const prog = ((t * pu.userData.speed) + pu.userData.phase) % 1;
+        pu.position.lerpVectors(new THREE.Vector3(0,0,0), n.position, prog);
+        pu.material.opacity = Math.sin(prog * Math.PI) * 0.9;
       });
 
       renderer.render(scene, camera);
