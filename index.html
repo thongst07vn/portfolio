@@ -161,7 +161,6 @@
     aspect-ratio:3/4;border-radius:4px;overflow:hidden;border:1px solid var(--line);
     background:linear-gradient(160deg,var(--bg-panel),#0a0d12);
     display:flex;align-items:center;justify-content:center;
-    max-height:555px;
   }
   .about-photo img{
     width:100%;
@@ -171,12 +170,13 @@
     display:flex;align-items:center;justify-content:center;
     image-rendering:auto;
   }
-  .about-copy p{color:var(--text-dim);line-height:1.85;font-size:1.02rem;margin-bottom:20px;}
+  .about-copy{display: flex;flex-direction: column;justify-content: space-evenly;}
+  .about-copy p{color:var(--text-dim);line-height:1.85;font-size:1.5rem;margin-bottom:20px;}
   .about-copy strong{color:var(--text);font-weight:600;}
   .stat-row{display:flex;gap:40px;margin-top:36px;flex-wrap:wrap;}
-  .stat b{display:block;font-size:1.9rem;font-family:var(--font-mono);color:var(--cyan);}
-  .stat span{font-size:.78rem;color:var(--text-dim);font-family:var(--font-mono);}
-  .contact-strip{margin-top:36px;display:flex;flex-direction:column;gap:10px;font-family:var(--font-mono);font-size:.86rem;color:var(--text-dim);}
+  .stat b{display:block;font-size:2rem;font-family:var(--font-mono);color:var(--cyan);}
+  .stat span{font-size:1rem;color:var(--text-dim);font-family:var(--font-mono);}
+  .contact-strip{margin-top:36px;display:flex;flex-direction:column;gap:10px;font-family:var(--font-mono);font-size:1rem;color:var(--text-dim);}
   .contact-strip a:hover{color:var(--cyan);}
 
   /* SKILLS */
@@ -280,8 +280,8 @@
 
 <section class="hero">
   <div class="hero-text">
-    <div class="eyebrow">BACK-END &amp; FRONT-END DEVELOPER</div>
-    <h1>Ngô Hoàng Thông <br>xây dựng <span class="accent">hệ thống</span> chạy thật, không chỉ demo.</h1>
+    <div class="eyebrow">FULLSTACK DEVELOPER</div>
+    <h1>Ngô Hoàng Thông <br>code cả <span class="accent">back-end</span> lẫn <span class="accent">front-end</span>, không ngại bất cứ phần nào.</h1>
     <p class="role">Spring Boot · Laravel · Vue/Angular · MySQL. Từ module admin, thanh toán PayPal đến chat real-time với SignalR — tập trung vào kiến trúc rõ ràng và sản phẩm dùng được ngay.</p>
     <div class="hero-cta">
       <a href="#projects" class="btn primary">Xem dự án →</a>
@@ -290,12 +290,12 @@
   </div>
   <div id="hero-canvas">
     <div class="hero-tip" id="hero-tip"></div>
-    <div class="hero-hint">⟲ kéo để xoay · nhấn vào từng lớp để xem kỹ năng</div>
+    <div class="hero-hint"></div>
   </div>
-  <div class="scroll-hint"><div class="line"></div>scroll</div>
+  <div class="scroll-hint"></div>
 </section>
 
-<section id="about">
+<section id="about reveal">
   <div class="section-head reveal">
     <div class="eyebrow">01 — VỀ TÔI</div>
     <h2>Kỹ sư phần mềm, tốt nghiệp Aptech</h2>
@@ -304,7 +304,7 @@
     <div class="about-photo reveal">
       <img src="anh-CV.jpg" alt="Ngô Hoàng Thông" loading="lazy">
     </div>
-    <div class="about-copy">
+    <div class="about-copy reveal">
       <p>Tôi tốt nghiệp ngành <strong>Software Engineer</strong> tại Aptech Computer Education (9/2022 – 7/2025, GPA 82/100), với kinh nghiệm thực chiến qua nhiều dự án full-stack và tại <strong>C3Tek</strong> và <strong>Toyar Inc</strong>.</p>
       <p>Thế mạnh của tôi là <strong>Java (Spring Boot)</strong> và REST API ở back-end, cùng <strong>HTML/CSS/JavaScript</strong> ở front-end. Tôi cũng làm việc thoải mái với PHP (Laravel), C# (ASP.NET), Vue.js và Angular tuỳ theo yêu cầu dự án.</p>
       <p>Ngoài web, tôi từng phát triển ứng dụng di động với <strong>Flutter</strong> (đã publish trên Google Play) và game với <strong>Unity/C#</strong> — nên khá quen với việc chuyển đổi giữa nhiều stack công nghệ khác nhau.</p>
